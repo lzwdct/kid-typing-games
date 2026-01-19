@@ -1,0 +1,13 @@
+name = "kids-typing-game"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".vercel/output/static"
+
+# AI binding for Workers AI
+[ai]
+binding = "AI"
+
+# Environment variables (set these in Cloudflare dashboard or via wrangler secret)
+# For local development, create a .dev.vars file
+# [vars]
+# NEXT_PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN = "your_token_here"

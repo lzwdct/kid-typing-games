@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@300;400;700&family=Quicksand:wght@400;600;700&display=swap');
+
+body {
+  @apply bg-gradient-to-br from-kids-yellow via-kids-pink to-kids-purple;
+  @apply font-kids;
+  @apply min-h-screen;
+}
+
+.game-card {
+  @apply bg-white rounded-kids shadow-2xl p-8;
+  @apply transition-transform hover:scale-105;
+}
+
+.btn-primary {
+  @apply bg-kids-blue hover:bg-blue-400 text-white font-bold py-3 px-6 rounded-kids;
+  @apply transition-all duration-200 transform hover:scale-105;
+  @apply shadow-lg;
+}
+
+.btn-secondary {
+  @apply bg-kids-green hover:bg-green-400 text-white font-bold py-3 px-6 rounded-kids;
+  @apply transition-all duration-200 transform hover:scale-105;
+  @apply shadow-lg;
+}
