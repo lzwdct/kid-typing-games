@@ -82,10 +82,18 @@ export function LetterPopGame() {
 
         const gameInterval = setInterval(() => {
             setLetters((prev) => {
-                const updated = prev.map((letter) => ({
-                    ...letter,
-                    progress: letter.progress + 1,
-                }));
+                const updated = prev.map((letter) => {
+                    // Calculate speed increment based on level
+                    // Level 1: ~15s (0.33 per tick)
+                    // Level 2: ~10s (0.5 per tick) 
+                    // Level 3: ~7s (0.7 per tick)
+                    const speedIncrement = selectedLevel === 1 ? 0.33 : selectedLevel === 2 ? 0.5 : 0.7;
+
+                    return {
+                        ...letter,
+                        progress: letter.progress + speedIncrement,
+                    };
+                });
 
                 // Check for letters that reached the bottom (only remove when actually past 100%)
                 const missed = updated.filter((l) => l.progress > 100);
@@ -102,7 +110,7 @@ export function LetterPopGame() {
         }, 50);
 
         return () => clearInterval(gameInterval);
-    }, [gameStarted, gameOver, decrementLife, resetStreak]);
+    }, [gameStarted, gameOver, decrementLife, resetStreak, selectedLevel]);
 
     // Add letters periodically
     useEffect(() => {
@@ -110,7 +118,7 @@ export function LetterPopGame() {
 
         const addInterval = setInterval(() => {
             addLetter();
-        }, selectedLevel === 1 ? 2000 : selectedLevel === 2 ? 1200 : 600); // Hard mode much faster
+        }, selectedLevel === 1 ? 3000 : selectedLevel === 2 ? 2000 : 1500); // Slower spawn rates
 
         return () => clearInterval(addInterval);
     }, [gameStarted, gameOver, addLetter, selectedLevel]);
