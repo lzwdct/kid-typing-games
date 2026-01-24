@@ -353,11 +353,15 @@ export function AcidRainGame() {
             {/* Game Over Screen */}
             {gameOver && (
                 <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
                 >
-                    <div className="game-card text-center">
+                    <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="game-card text-center max-w-2xl w-full bg-white rounded-3xl p-8 shadow-2xl"
+                    >
                         <h1 className="text-5xl font-bold text-kids-pink mb-6">Game Over!</h1>
                         <p className="text-3xl font-bold text-kids-blue mb-4">
                             Final Score: {score}
@@ -372,7 +376,7 @@ export function AcidRainGame() {
                         <button onClick={startGame} className="btn-primary text-2xl mt-8">
                             Play Again! 🎮
                         </button>
-                    </div>
+                    </motion.div>
                 </motion.div>
             )}
         </main>

@@ -205,35 +205,41 @@ export function LetterPopGame() {
                 ) : gameOver ? (
                     /* Game Over Screen */
                     <motion.div
-                        initial={{ scale: 0.8, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        className="bg-white rounded-3xl p-12 shadow-2xl text-center"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
                     >
-                        <div className="text-6xl mb-6">🎮</div>
-                        <h2 className="text-3xl font-bold mb-4 text-gray-800">Game Over!</h2>
-                        <p className="text-gray-600 mb-6 text-lg">
-                            You popped {totalWordsTyped} balloons!
-                        </p>
-                        <div className="text-5xl font-bold text-kids-purple mb-8">{score}</div>
+                        <motion.div
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            className="bg-white rounded-3xl p-12 shadow-2xl text-center max-w-2xl w-full"
+                        >
+                            <div className="text-6xl mb-6">🎮</div>
+                            <h2 className="text-3xl font-bold mb-4 text-gray-800">Game Over!</h2>
+                            <p className="text-gray-600 mb-6 text-lg">
+                                You popped {totalWordsTyped} balloons!
+                            </p>
+                            <div className="text-5xl font-bold text-kids-purple mb-8">{score}</div>
 
-                        <div className="mb-8">
-                            <ShareScore score={score} gameName="Letter Pop" />
-                        </div>
+                            <div className="mb-8">
+                                <ShareScore score={score} gameName="Letter Pop" />
+                            </div>
 
-                        <div className="flex gap-4 justify-center">
-                            <button
-                                onClick={startGame}
-                                className="px-8 py-3 bg-kids-blue text-white rounded-full font-bold hover:shadow-lg transition-all"
-                            >
-                                Play Again
-                            </button>
-                            <Link
-                                href="/"
-                                className="px-8 py-3 bg-gray-200 text-gray-700 rounded-full font-bold hover:shadow-lg transition-all"
-                            >
-                                Home
-                            </Link>
-                        </div>
+                            <div className="flex gap-4 justify-center">
+                                <button
+                                    onClick={startGame}
+                                    className="px-8 py-3 bg-kids-blue text-white rounded-full font-bold hover:shadow-lg transition-all"
+                                >
+                                    Play Again
+                                </button>
+                                <Link
+                                    href="/"
+                                    className="px-8 py-3 bg-gray-200 text-gray-700 rounded-full font-bold hover:shadow-lg transition-all"
+                                >
+                                    Home
+                                </Link>
+                            </div>
+                        </motion.div>
                     </motion.div>
                 ) : (
                     /* Game Screen */
