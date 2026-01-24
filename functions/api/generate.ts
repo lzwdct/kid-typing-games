@@ -25,7 +25,19 @@ const CACHE_CONFIG = {
   },
 };
 
+const STORY_TOPICS = [
+  'a friendly dragon', 'a space adventure', 'a magical forest', 'a day at the beach',
+  'a funny robot', 'a brave superhero', 'a lost puppy', 'a picnic in the park',
+  'underwater exploration', 'a flying car', 'a delicious pizza party', 'a cute kitten',
+  'a visiting alien', 'a hidden treasure', 'a magic school bus', 'a dinosaur friend',
+  'jumping on the moon', 'a secret garden', 'a big storm', 'making a new friend',
+  'a race car', 'a camping trip', 'growing a giant flower', 'baking cookies'
+];
 
+const WORD_CATEGORIES = [
+  'animals', 'food', 'nature', 'space', 'fantasy', 'school', 'home', 'technology',
+  'ocean', 'emotions', 'colors', 'clothing', 'sports', 'music', 'art', 'professions'
+];
 
 function shuffleArray(array: string[]): string[] {
   const arr = [...array];
@@ -120,10 +132,12 @@ export const onRequest = async (context: PagesContext): Promise<Response> => {
     // Handle story-time mode separately
     if (mode === 'story-time' && context.env.AI) {
       try {
+        const randomTopic = STORY_TOPICS[Math.floor(Math.random() * STORY_TOPICS.length)];
+
         const storyLengths: Record<string, string> = {
-          '1': 'Write a very short 2-3 sentence story for young children (ages 4-6). Use only simple 3-letter or 4-letter words. STRICTLY separate sentences with periods. Example: "The cat sat. The dog run."',
-          '2': 'Write a short 3-4 sentence story for young children (ages 5-7). Use simple words. STRICTLY separate sentences with periods.',
-          '3': 'Write a 4-5 sentence story for children (ages 6-8). STRICTLY separate sentences with periods. Keep the story short and fun.',
+          '1': `Write a very short 2-3 sentence story for young children (ages 4-6) about "${randomTopic}". Use only simple 3-letter or 4-letter words. STRICTLY separate sentences with periods. Example: "The cat sat. The dog run."`,
+          '2': `Write a short 3-4 sentence story for young children (ages 5-7) about "${randomTopic}". Use simple words. STRICTLY separate sentences with periods.`,
+          '3': `Write a 4-5 sentence story for children (ages 6-8) about "${randomTopic}". STRICTLY separate sentences with periods. Keep the story short and fun.`,
         };
 
         const prompt = storyLengths[level] || storyLengths['1'];
@@ -134,7 +148,7 @@ export const onRequest = async (context: PagesContext): Promise<Response> => {
           messages: [
             {
               role: 'system',
-              content: 'You are a children\'s storyteller. Write age-appropriate, fun, and educational stories. ALWAYS use proper punctuation ending each sentence with a period. Do not use colons or complex lists.',
+              content: 'You are a children\'s storyteller. Write age-appropriate, fun, and educational stories. ALWAYS use proper punctuation ending each sentence with a period. Do NOT use colons (:), semi-colons (;), or complex lists. Keep sentences simple.',
             },
             {
               role: 'user',
@@ -144,7 +158,11 @@ export const onRequest = async (context: PagesContext): Promise<Response> => {
         });
 
         if (aiResponse && (aiResponse as any).response) {
-          const storyText = (aiResponse as any).response;
+          let storyText = (aiResponse as any).response;
+
+          // Sanitize the story text to remove colons and other difficult punctuation
+          storyText = storyText.replace(/[:;]/g, '.').replace(/\.{2,}/g, '.');
+
           const response = new Response(
             JSON.stringify({
               success: true,
@@ -173,6 +191,8 @@ export const onRequest = async (context: PagesContext): Promise<Response> => {
     // Try to use AI to generate words
     if (context.env.AI) {
       try {
+        const randomCategory = WORD_CATEGORIES[Math.floor(Math.random() * WORD_CATEGORIES.length)];
+
         const difficultyDescriptions: Record<string, string> = {
           easy: 'STRICTLY 3-letter simple words (e.g., cat, dog, sun)',
           medium: 'STRICTLY 4-5 letter common words (e.g., play, jump, tree)',
@@ -180,7 +200,7 @@ export const onRequest = async (context: PagesContext): Promise<Response> => {
           expert: 'STRICTLY 9+ letter challenging words (e.g., adventure, education, technology)',
         };
 
-        const prompt = `Generate exactly ${count} unique English words for kids learning typing. 
+        const prompt = `Generate exactly ${count} unique English words related to "${randomCategory}" (or general kid-friendly words if needed) for kids learning typing. 
         Difficulty: ${difficultyDescriptions[difficulty] || difficultyDescriptions.easy}. 
         CRITICAL: All generated words MUST be exactly within the character length range specified for the difficulty. 
         Return ONLY the words as a comma-separated list, no explanations or numbering.`;
