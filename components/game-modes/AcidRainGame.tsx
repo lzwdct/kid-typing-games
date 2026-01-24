@@ -72,7 +72,7 @@ export function AcidRainGame() {
     // Calculate difficulty based on selected level - SUPER EASY MODE
     const getCurrentDifficulty = () => {
         if (selectedLevel === 1) return 'easy';
-        if (selectedLevel === 2) return 'hard';
+        if (selectedLevel === 2) return 'medium'; // Smoother curve (was hard)
         return 'expert';
     };
 
@@ -113,12 +113,13 @@ export function AcidRainGame() {
             const randomWord = availableWords[Math.floor(Math.random() * availableWords.length)];
 
             // Speed based on level (duration in seconds, lower is faster)
+            // Speed based on level (duration in seconds, lower is faster)
             const speedMap: Record<number, number> = {
-                1: 25, // Much slower for kids (was 15)
-                2: 15, // (was 10)
-                3: 10  // (was 7)
+                1: 30, // Much slower for kids (was 25)
+                2: 20, // (was 15)
+                3: 12  // (was 10)
             };
-            const speed = speedMap[selectedLevel] || 15;
+            const speed = speedMap[selectedLevel] || 20;
 
             const newWord: ActiveWord = {
                 id: `word-${Date.now()}-${Math.random()}`, // Use timestamp + random for unique IDs
@@ -201,14 +202,30 @@ export function AcidRainGame() {
     useEffect(() => {
         if (!gameStarted || gameOver) return;
 
+        // Dynamic spawn rate based on level
+        const spawnIntervalMap: Record<number, number> = {
+            1: 4500, // Very slow spawn for Level 1 (was 3000)
+            2: 3500,
+            3: 2500
+        };
+        const intervalTime = spawnIntervalMap[selectedLevel] || 3000;
+
+        // Dynamic max words on screen
+        const maxWordsMap: Record<number, number> = {
+            1: 3, // Max 3 words for Level 1 to reduce clutter
+            2: 4,
+            3: 5
+        };
+        const maxWords = maxWordsMap[selectedLevel] || 5;
+
         const interval = setInterval(() => {
-            if (activeWords.length < 5) {
+            if (activeWords.length < maxWords) {
                 addWord();
             }
-        }, 3000);
+        }, intervalTime);
 
         return () => clearInterval(interval);
-    }, [gameStarted, gameOver, activeWords.length, addWord]);
+    }, [gameStarted, gameOver, activeWords.length, addWord, selectedLevel]);
 
     // Check game over
     useEffect(() => {
