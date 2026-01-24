@@ -265,7 +265,7 @@ export const onRequest = async (context: PagesContext): Promise<Response> => {
           // Parse AI response
           const wordsText = (aiResponse as any).response.trim();
           const words: string[] = wordsText
-            .split(/[,\n]+/)
+            .split(/[,\n ]+/)
             .map((w: string) => w.trim().toLowerCase().replace(/[^a-z]/g, ''))
             .filter((w: string) => w.length > 0);
 
