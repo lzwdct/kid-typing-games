@@ -32,10 +32,10 @@ export function WordRaceGame() {
                 throw new Error('Invalid API response');
             }
             const words = data.words.map((w: any) => w.text) || [];
-            return words.length > 0 ? words : FALLBACK_WORDS;
+            return words.length > 0 ? words : [...FALLBACK_WORDS].sort(() => Math.random() - 0.5);
         } catch (error) {
             console.error('Failed to fetch words:', error);
-            return FALLBACK_WORDS;
+            return [...FALLBACK_WORDS].sort(() => Math.random() - 0.5);
         }
     };
 

@@ -56,6 +56,44 @@ function generateWrongSpelling(word: string): string {
   return chars.join('');
 }
 
+// Large fallback dictionary for when AI fails or times out
+const FALLBACK_DICTIONARY = {
+  easy: [
+    'cat', 'dog', 'sun', 'run', 'fun', 'hat', 'bat', 'mat', 'can', 'pan',
+    'big', 'red', 'fox', 'box', 'day', 'sky', 'cow', 'pig', 'bus', 'car',
+    'toy', 'boy', 'nut', 'jam', 'egg', 'cup', 'bed', 'key', 'pen', 'map'
+  ],
+  medium: [
+    'jump', 'play', 'blue', 'tree', 'ball', 'kite', 'fish', 'bird', 'star',
+    'moon', 'cake', 'milk', 'book', 'door', 'home', 'park', 'duck', 'frog',
+    'bear', 'lion', 'sand', 'wind', 'snow', 'rain', 'fire', 'gold', 'ship'
+  ],
+  hard: [
+    'happy', 'smile', 'laugh', 'cloud', 'horse', 'snake', 'zebra', 'tiger',
+    'apple', 'grape', 'lemon', 'melon', 'berry', 'peach', 'mango', 'pizza',
+    'party', 'music', 'dance', 'beach', 'water', 'plant', 'flower', 'world'
+  ],
+  expert: [
+    'adventure', 'beautiful', 'butterfly', 'chocolate', 'dinosaur', 'elephant',
+    'fantastic', 'garden', 'holiday', 'island', 'jungle', 'kangaroo', 'lightning',
+    'mountain', 'notebook', 'ocean', 'penguin', 'rainbow', 'sunshine', 'treasure'
+  ]
+};
+
+function getRandomWordsFromDictionary(count: number, difficulty: string): string[] {
+  const diffKey = difficulty as keyof typeof FALLBACK_DICTIONARY;
+  let pool: string[] = [];
+
+  if (diffKey === 'easy') pool = [...FALLBACK_DICTIONARY.easy];
+  else if (diffKey === 'medium') pool = [...FALLBACK_DICTIONARY.easy, ...FALLBACK_DICTIONARY.medium];
+  else if (diffKey === 'hard') pool = [...FALLBACK_DICTIONARY.medium, ...FALLBACK_DICTIONARY.hard];
+  else pool = [...FALLBACK_DICTIONARY.hard, ...FALLBACK_DICTIONARY.expert];
+
+  if (pool.length === 0) pool = FALLBACK_DICTIONARY.easy;
+
+  return shuffleArray(pool).slice(0, count);
+}
+
 // Cache helper functions
 async function getCachedResponse(cacheKey: string, cacheName: string): Promise<Response | null> {
   try {
@@ -109,6 +147,8 @@ async function setCachedResponse(
 }
 
 export const onRequest = async (context: PagesContext): Promise<Response> => {
+  let source = 'ai'; // Track where words came from for debugging
+
   try {
     const url = new URL(context.request.url);
     const difficulty = url.searchParams.get('difficulty') || 'easy';
@@ -169,6 +209,7 @@ export const onRequest = async (context: PagesContext): Promise<Response> => {
               story: storyText.trim(),
               level,
               mode,
+              source: 'ai'
             }),
             {
               headers: { 'Content-Type': 'application/json' },
@@ -231,19 +272,42 @@ export const onRequest = async (context: PagesContext): Promise<Response> => {
           // Remove duplicates and limit to requested count
           const uniqueWords: string[] = Array.from(new Set(words));
           selectedWords = uniqueWords.slice(0, count);
+
+          if (selectedWords.length > 0) {
+            console.log(`AI generation successful: ${selectedWords.length} words`);
+            source = 'ai';
+          }
         }
       } catch (aiError) {
-        console.error('AI generation failed:', aiError);
-        throw aiError; // Re-throw to be caught by outer catch
+        console.error('AI generation failed, falling back to dictionary:', aiError);
+        selectedWords = getRandomWordsFromDictionary(count, difficulty);
+        source = 'dictionary_fallback_ai_error';
       }
+    } else {
+      // No AI env found
+      console.log('No AI environment found, using dictionary');
+      selectedWords = getRandomWordsFromDictionary(count, difficulty);
+      source = 'dictionary_no_ai';
     }
 
-    // If we have some words, return them even if fewer than requested
-    if (selectedWords.length > 0 && selectedWords.length < count) {
-      console.log(`AI generated fewer words than requested: ${selectedWords.length}/${count}`);
-      // Proceed with what we have
-    } else if (selectedWords.length === 0) {
-      throw new Error('AI generated zero valid words');
+    // Fill with dictionary words if AI didn't generate enough
+    if (selectedWords.length < count) {
+      console.log(`AI generated fewer words than requested (${selectedWords.length}/${count}), padding with dictionary.`);
+      const paddingNeeded = count - selectedWords.length;
+      const paddingWords = getRandomWordsFromDictionary(paddingNeeded, difficulty);
+
+      for (const word of paddingWords) {
+        if (!selectedWords.includes(word)) {
+          selectedWords.push(word);
+        }
+      }
+      if (selectedWords.length === 0) {
+        // Total failure of AI to produce any valid words
+        source = 'dictionary_fallback_zero_result';
+        selectedWords = getRandomWordsFromDictionary(count, difficulty);
+      } else if (source === 'ai') {
+        source = 'ai_partial_dictionary_padded';
+      }
     }
 
     // Format response
@@ -267,6 +331,7 @@ export const onRequest = async (context: PagesContext): Promise<Response> => {
         words: formattedWords,
         level,
         mode,
+        source: source
       }),
       {
         headers: { 'Content-Type': 'application/json' },
