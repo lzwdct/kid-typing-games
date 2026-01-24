@@ -74,6 +74,20 @@ export function SpellingBloomGame() {
         }
     };
 
+    // Fallback words with wrong spellings
+    const FALLBACK_WORDS: Word[] = [
+        { id: 'fb1', text: 'happy', wrongSpelling: 'hapy' },
+        { id: 'fb2', text: 'little', wrongSpelling: 'litle' },
+        { id: 'fb3', text: 'friend', wrongSpelling: 'freind' },
+        { id: 'fb4', text: 'school', wrongSpelling: 'scool' },
+        { id: 'fb5', text: 'sister', wrongSpelling: 'sistr' },
+        { id: 'fb6', text: 'brother', wrongSpelling: 'bruther' },
+        { id: 'fb7', text: 'mother', wrongSpelling: 'muther' },
+        { id: 'fb8', text: 'father', wrongSpelling: 'fadur' },
+        { id: 'fb9', text: 'animal', wrongSpelling: 'aminal' },
+        { id: 'fb10', text: 'banana', wrongSpelling: 'bannana' }
+    ];
+
     // Fetch words from API
     const fetchWords = async () => {
         try {
@@ -103,7 +117,8 @@ export function SpellingBloomGame() {
             return data.words;
         } catch (error) {
             console.error('Failed to fetch words:', error);
-            throw error;
+            // Return fallback words instead of throwing
+            return FALLBACK_WORDS;
         }
     };
 

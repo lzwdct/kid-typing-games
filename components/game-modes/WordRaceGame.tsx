@@ -25,19 +25,27 @@ export function WordRaceGame() {
             const difficulty = selectedLevel === 1 ? 'easy' : selectedLevel === 2 ? 'medium' : 'hard';
             const timestamp = Date.now();
             const response = await fetch(
-                `/api/generate?level=${selectedLevel}&mode=acid-rain&count=100&difficulty=${difficulty}&timestamp=${timestamp}`
+                `/api/generate?level=${selectedLevel}&mode=word-race&count=50&difficulty=${difficulty}&timestamp=${timestamp}`
             );
             const data = await response.json();
             if (!data.success || !data.words) {
                 throw new Error('Invalid API response');
             }
             const words = data.words.map((w: any) => w.text) || [];
-            return words.length > 0 ? words : ['cat', 'dog', 'sun', 'run', 'fun', 'hat', 'bat', 'mat', 'can', 'pan'];
+            return words.length > 0 ? words : FALLBACK_WORDS;
         } catch (error) {
             console.error('Failed to fetch words:', error);
-            return ['cat', 'dog', 'sun', 'run', 'fun', 'hat', 'bat', 'mat', 'can', 'pan'];
+            return FALLBACK_WORDS;
         }
     };
+
+    const FALLBACK_WORDS = [
+        'cat', 'dog', 'sun', 'run', 'fun', 'hat', 'bat', 'mat', 'can', 'pan',
+        'fish', 'bird', 'jump', 'play', 'blue', 'red', 'green', 'tree', 'ball', 'kite',
+        'happy', 'smile', 'laugh', 'cloud', 'star', 'moon', 'cake', 'milk', 'book', 'door',
+        'house', 'park', 'duck', 'frog', 'bear', 'lion', 'tiger', 'zebra', 'snake', 'horse',
+        'apple', 'grape', 'lemon', 'melon', 'berry', 'peach', 'mango', 'pizza', 'taco', 'chip'
+    ];
 
     // Start game
     const startGame = async () => {
